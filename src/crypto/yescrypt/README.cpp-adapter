@@ -1,0 +1,27 @@
+# Phase 1 C++ Adapter
+
+This directory contains the Phase 1 C++ adapter for yescrypt.
+
+`yescrypt_cpp.h` and `yescrypt_cpp.cpp` intentionally provide only a small,
+type-safe C++ interface over the existing `yescrypt_hash` C entry point. The
+algorithm remains in the existing C implementation until the Phase 2 port is
+complete.
+
+The adapter accepts exactly the 80-byte input and produces exactly the 32-byte
+output used by `yescrypt_hash`. It does not change consensus behavior.
+
+## Example
+
+```cpp
+#include <array>
+#include <cstdint>
+#include "crypto/yescrypt/yescrypt_cpp.h"
+
+std::array<std::uint8_t, yescrypt::Hash::INPUT_SIZE> input{};
+std::array<std::uint8_t, yescrypt::Hash::OUTPUT_SIZE> output{};
+const auto result = yescrypt::Hash::Compute(input, output);
+```
+
+Phase 1 validation should compare `Hash::Compute` output with the existing
+`yescrypt_hash` output for deterministic 80-byte test vectors. The C API remains
+available for existing callers, including `CHashWriterYescrypt` in `src/hash.h`.
