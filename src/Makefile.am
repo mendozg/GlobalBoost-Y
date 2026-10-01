@@ -49,73 +49,15 @@ LIBGLOBALBOOST_WALLET=libglobalboost_wallet.a
 LIBGLOBALBOOST_WALLET_TOOL=libglobalboost_wallet_tool.a
 endif
 
-LIBGLOBALBOOST_CRYPTO = $(LIBGLOBALBOOST_CRYPTO_BASE)
-if ENABLE_SSE41
-LIBGLOBALBOOST_CRYPTO_SSE41 = crypto/libglobalboost_crypto_sse41.la
-LIBGLOBALBOOST_CRYPTO += $(LIBGLOBALBOOST_CRYPTO_SSE41)
-endif
-if ENABLE_AVX2
-LIBGLOBALBOOST_CRYPTO_AVX2 = crypto/libglobalboost_crypto_avx2.la
-LIBGLOBALBOOST_CRYPTO += $(LIBGLOBALBOOST_CRYPTO_AVX2)
-endif
-if ENABLE_X86_SHANI
-LIBGLOBALBOOST_CRYPTO_X86_SHANI = crypto/libglobalboost_crypto_x86_shani.la
-LIBGLOBALBOOST_CRYPTO += $(LIBGLOBALBOOST_CRYPTO_X86_SHANI)
-endif
-if ENABLE_ARM_SHANI
-LIBGLOBALBOOST_CRYPTO_ARM_SHANI = crypto/libglobalboost_crypto_arm_shani.la
-LIBGLOBALBOOST_CRYPTO += $(LIBGLOBALBOOST_CRYPTO_ARM_SHANI)
-endif
-noinst_LTLIBRARIES += $(LIBGLOBALBOOST_CRYPTO)
-
-$(LIBSECP256K1): $(wildcard secp256k1/src/*.h) $(wildcard secp256k1/src/*.c) $(wildcard secp256k1/include/*)
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
-# Make is not made aware of per-object dependencies to avoid limiting building parallelization
-# But to build the less dependent modules first, we manually select their order here:
-EXTRA_LIBRARIES += \
-  $(LIBGLOBALBOOST_UTIL) \
-  $(LIBGLOBALBOOST_COMMON) \
-  $(LIBGLOBALBOOST_CONSENSUS) \
-  $(LIBGLOBALBOOST_NODE) \
-  $(LIBGLOBALBOOST_CLI) \
-  $(LIBGLOBALBOOST_IPC) \
-  $(LIBGLOBALBOOST_WALLET) \
-  $(LIBGLOBALBOOST_WALLET_TOOL) \
-  $(LIBGLOBALBOOST_ZMQ)
-
-if BUILD_GLOBALBOOSTD
-  bin_PROGRAMS += globalboostd
-endif
-
-if BUILD_GLOBALBOOST_NODE
-  bin_PROGRAMS += globalboost-node
-endif
-
-if BUILD_GLOBALBOOST_CLI
-  bin_PROGRAMS += globalboost-cli
-endif
-
-if BUILD_GLOBALBOOST_TX
-  bin_PROGRAMS += globalboost-tx
-endif
-
-if ENABLE_WALLET
-if BUILD_GLOBALBOOST_WALLET
-  bin_PROGRAMS += globalboost-wallet
-endif
-endif
-
-if BUILD_GLOBALBOOST_UTIL
-  bin_PROGRAMS += globalboost-util
-endif
-
-if BUILD_GLOBALBOOST_CHAINSTATE
-  bin_PROGRAMS += globalboost-chainstate
-endif
+include Makefile.qttest.include
 
 .PHONY: FORCE check-symbols check-security
-# globalboost core #
+# Ensure all dependencies are built before we use them to build more things
+$(LIBSECP256K1): FORCE
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 libsecp256k1.la
+
+# Pattern rule to print variables, e.g. make print-top_srcdir
+
 GLOBALBOOST_CORE_H = \
   addrdb.h \
   addrman.h \
@@ -124,37 +66,84 @@ GLOBALBOOST_CORE_H = \
   banman.h \
   base58.h \
   bech32.h \
+  bloom.h \
   blockencodings.h \
   blockfilter.h \
+  blockfilter.h \
+  blockindexstats.h \
+  blockindexstats.h \
+  blockindex.h \
+  blockindex.h \
+  block.h \
+  blockstorage.h \
+  blockstorage.h \
+  blockvalidation.h \
+  blockvalidation.h \
+  block_index.h \
+  blockvalidator.h \
+  blockvalidator.h \
+  cachemultimap.h \
   chain.h \
   chainparams.h \
   chainparamsbase.h \
   chainparamsseeds.h \
+  checkpoints.h \
   checkqueue.h \
   clientversion.h \
   coins.h \
+  coinscache.h \
+  coinscache.h \
+  common/args.h \
   common/bloom.h \
   common/init.h \
-  common/run_command.h \
+  common/messages.h \
+  common/run_tests.h \
+  common/settings.h \
+  common/signmessage.h \
+  common/system.h \
   common/url.h \
-  compat/assumptions.h \
-  compat/byteswap.h \
+  compat.h \
   compat/compat.h \
-  compat/cpuid.h \
-  compat/endian.h \
   compressor.h \
   consensus/consensus.h \
-  consensus/tx_check.h \
-  consensus/tx_verify.h \
+  consensus/merkle.h \
+  consensus/params.h \
+  consensus/validation.h \
   core_io.h \
   core_memusage.h \
   cuckoocache.h \
+  ctpl/ctpl_stl.h \
+  ctpl/ctpl.h \
+  ctpl/ctpl.h.swp \
+  database.h \
   dbwrapper.h \
   deploymentinfo.h \
   deploymentstatus.h \
-  external_signer.h \
+  deserialize.h \
+  dummywallet.h \
+  eventmanager.h \
+  events.h \
+  events.h \
   flatfile.h \
-  headerssync.h \
+  flatfile.h \
+  flat_db.h \
+  flat_db_sqlite.h \
+  flat_db_leveldb.h \
+  flatdataset.h \
+  flat_dataset.h \
+  flushablestorage.h \
+  fs.h \
+  ftl/concurrent_vector.h \
+  ftl/concurrent_queue.h \
+  ftl/event.h \
+  ftl/object_pool.h \
+  ftl/lfqueue.h \
+  ftl/vector.h \
+  ftl/deque.h \
+  ftl/task_system.h \
+  ftl/task_counter.h \
+  ftl/atomic.h \
+  hash.h \
   httprpc.h \
   httpserver.h \
   i2p.h \
@@ -162,163 +151,310 @@ GLOBALBOOST_CORE_H = \
   index/blockfilterindex.h \
   index/coinstatsindex.h \
   index/disktxpos.h \
-  index/txindex.h \
+  index/disktxpos.h \
   indirectmap.h \
   init.h \
   init/common.h \
+  init/globalboostd.h \
   interfaces/chain.h \
   interfaces/echo.h \
   interfaces/handler.h \
   interfaces/init.h \
-  interfaces/ipc.h \
   interfaces/node.h \
   interfaces/wallet.h \
-  kernel/blockmanager_opts.h \
-  kernel/chain.h \
+  i2p.h \
+  kernel/blockmanager.h \
   kernel/chainparams.h \
-  kernel/chainstatemanager_opts.h \
   kernel/checks.h \
   kernel/coinstats.h \
   kernel/context.h \
-  kernel/cs_main.h \
-  kernel/mempool_entry.h \
   kernel/mempool_limits.h \
-  kernel/mempool_options.h \
   kernel/mempool_persist.h \
-  kernel/validation_cache_sizes.h \
+  kernel/mempool_removal_reason.h \
+  kernel/mempool_removal_reason.h \
+  kernel/mempool_removal_reason.h \
+  kernel/mempool_removal_reason.h \
+  kernel/mempool.h \
+  kernel/signals.h \
+  kernel/validation.h \
+  kernel/warnings.h \
   key.h \
   key_io.h \
   logging.h \
   logging/timer.h \
-  mapport.h \
+  mapfile.h \
   memusage.h \
   merkleblock.h \
+  miner.h \
+  modules/mp_node_rpc.h \
+  modules/mp_network_config.h \
+  modules/mp_networkmanager.h \
+  modules/mp_p2p_message_handler.h \
+  modules/mp_message_router.h \
   net.h \
-  net_permissions.h \
-  net_processing.h \
-  net_types.h \
   netaddress.h \
   netbase.h \
-  netgroup.h \
   netmessagemaker.h \
-  node/blockmanager_args.h \
+  network.h \
   node/blockstorage.h \
   node/caches.h \
   node/chainstate.h \
-  node/chainstatemanager_args.h \
-  node/coin.h \
-  node/coins_view_args.h \
+  node/coin_selection.h \
+  node/coins_view.h \
   node/connection_types.h \
   node/context.h \
-  node/database_args.h \
   node/eviction.h \
-  node/interface_ui.h \
-  node/mempool_args.h \
-  node/mempool_persist_args.h \
-  node/miner.h \
-  node/minisketchwrapper.h \
+  node/mini_node.h \
   node/psbt.h \
-  node/transaction.h \
-  node/txreconciliation.h \
-  node/utxo_snapshot.h \
-  node/validation_cache_args.h \
+  node/transaction_metadata.h \
+  node/tx_memory_pool.h \
+  node/txdownloadman.h \
+  node/txdownloadman_impl.h \
+  node/validation.h \
   noui.h \
+  optional.h \
   outputtype.h \
+  p2p_message_type.h \
+  p2p/address_info.h \
+  p2p/banman.h \
+  p2p/connection_types.h \
+  p2p/net.h \
+  p2p/netbase.h \
+  p2p/netmessagemaker.h \
+  p2p/protocol.h \
+  p2p/protocol_types.h \
+  p2p_message_handler.h \
+  p2p_message_router.h \
+  p2p_network_config.h \
+  p2p_networkmanager.h \
+  p2p_protocol.h \
+  p2p_protocol_types.h \
+  paymentserver.h \
+  peerman.h \
+  peerman.h \
+  peerman.h \
   policy/feerate.h \
   policy/fees.h \
-  policy/fees_args.h \
   policy/packages.h \
   policy/policy.h \
   policy/rbf.h \
   policy/settings.h \
   pow.h \
+  primitives/block.h \
+  primitives/block.h \
+  primitives/block.h \
+  primitives/transaction.h \
+  primitives/txid.h \
+  primitives/txid.h \
   protocol.h \
   psbt.h \
+  pubkey.h \
   random.h \
   randomenv.h \
-  rest.h \
-  reverse_iterator.h \
+  raw_transaction.h \
   rpc/blockchain.h \
+  rpc/blockchain_json.h \
   rpc/client.h \
+  rpc/command.h \
+  rpc/connection_info.h \
+  rpc/debug.h \
+  rpc/describe.h \
+  rpc/external_signer.h \
+  rpc/fee_estimate.h \
+  rpc/jsonrpc.h \
   rpc/mempool.h \
-  rpc/mining.h \
+  rpc/mempool_fee_estimate.h \
+  rpc/misc.h \
+  rpc/moneypot.h \
+  rpc/net.h \
+  rpc/peer_connection.h \
   rpc/protocol.h \
+  rpc/rawtransaction.h \
   rpc/rawtransaction_util.h \
-  rpc/register.h \
-  rpc/request.h \
   rpc/server.h \
-  rpc/server_util.h \
+  rpc/signmessage.h \
+  rpc/signrawtransaction.h \
+  rpc/system.h \
   rpc/util.h \
-  scheduler.h \
+  rpc/wallet_util.h \
   script/descriptor.h \
   script/keyorigin.h \
-  script/miniscript.h \
-  script/sigcache.h \
+  script/script.h \
+  script/scripttype.h \
   script/sign.h \
   script/signingprovider.h \
+  script/solidity_utils.h \
   script/standard.h \
+  serialize.h \
+  server.h \
+  settings.h \
   shutdown.h \
   signet.h \
+  skiplist.h \
+  socket.h \
+  span.h \
+  spork.h \
+  stacktraces.h \
   streams.h \
+  support/allocators/mt_pooled_secure.h \
+  support/allocators/pooled_secure.h \
   support/allocators/secure.h \
   support/allocators/zeroafterfree.h \
   support/cleanse.h \
   support/events.h \
   support/lockedpool.h \
   sync.h \
+  syncstatus.h \
+  system.h \
+  telemetry.h \
+  test/fuzz/fuzz.h \
+  test/fuzz/util.h \
+  test/util/blockfilter.h \
+  test/util/index.h \
+  test/util/mining.h \
+  test/util/net.h \
+  test/util/script.h \
+  test/util/setup_common.h \
+  test/util/str.h \
+  test/util/transaction.h \
+  test/util/txmempool.h \
+  test/util/validation.h \
+  test/util/wallet.h \
+  threadinterrupt.h \
   threadsafety.h \
+  threadutil.h \
+  time.h \
   timedata.h \
   torcontrol.h \
+  torexitaddresses.h \
+  totalcoins.h \
+  tr.h \
   txdb.h \
+  txdb.h \
+  txglobaldata.h \
+  txglobaldata.h \
   txmempool.h \
-  txorphanage.h \
-  txrequest.h \
+  txmempool.h \
+  txmempool.h \
+  txmemorybuffer.h \
+  txmemorybuffer.h \
+  txmemorybuffer.h \
+  txmessages.h \
+  txorphanpool.h \
+  txorphanpool.h \
+  txpool.h \
+  txpool.h \
+  txpool.h \
+  txpool.h \
+  txpool.h \
+  txpoolmgr.h \
+  txpoolmgr.h \
+  txpoolmgr.h \
+  txpoolmgr.h \
+  txpoolmgr.h \
+  txpoolmgr_impl.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txpoolstats.h \
+  txqueue.h \
+  txrelay.h \
+  txrelay.h \
+  txrelay.h \
+  txrelay.h \
+  txrelay.h \
+  txrelay.h \
+  txspeedometer.h \
+  txvalidationstate.h \
+  txvalidationstate.h \
+  txvalidationstate.h \
+  txvalidationstate.h \
+  txvalidationstate.h \
+  txvalidationstate.h \
+  txvalidationstate.h \
+  txxmempool_manager.h \
+  txxmempool_manager.h \
+  txxmempool_manager.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  txvault.h \
+  ui_interface.h \
   undo.h \
+  unordered_lru_cache.h \
   util/asmap.h \
-  util/bip32.h \
-  util/bitdeque.h \
+  util/bip32path.h \
   util/bytevectorhash.h \
   util/check.h \
   util/epochguard.h \
-  util/error.h \
   util/exception.h \
   util/fastrange.h \
   util/fees.h \
-  util/fs.h \
-  util/fs_helpers.h \
   util/getuniquepath.h \
   util/golombrice.h \
-  util/hash_type.h \
+  util/hash.h \
+  util/hashwrapper.h \
   util/hasher.h \
   util/macros.h \
   util/message.h \
   util/moneystr.h \
-  util/overflow.h \
-  util/overloaded.h \
-  util/rbf.h \
+  util/overrides.h \
+  util/ranges.h \
   util/readwritefile.h \
   util/result.h \
   util/serfloat.h \
-  util/settings.h \
+  util/serialize.h \
   util/sock.h \
   util/spanparsing.h \
+  util/strencodings.h \
   util/string.h \
-  util/syscall_sandbox.h \
-  util/syserror.h \
   util/system.h \
-  util/thread.h \
-  util/threadinterrupt.h \
-  util/threadnames.h \
   util/time.h \
-  util/tokenpipe.h \
-  util/trace.h \
+  util/transaction.h \
   util/translation.h \
   util/types.h \
-  util/ui_change_type.h \
+  util/url.h \
   util/vector.h \
+  util/vector_hash.h \
   validation.h \
   validationinterface.h \
-  versionbits.h \
+  validationinterface.h \
+  validationinterface.h \
+  validationinterface.h \
+  validationinterface.h \
+  validationinterface.h \
+  validationstate.h \
+  validationstate.h \
+  versionbitsinfo.h \
   wallet/bdb.h \
   wallet/coincontrol.h \
   wallet/coinselection.h \
@@ -329,28 +465,31 @@ GLOBALBOOST_CORE_H = \
   wallet/external_signer_scriptpubkeyman.h \
   wallet/feebumper.h \
   wallet/fees.h \
+  wallet/ismine.h \
   wallet/load.h \
-  wallet/receive.h \
   wallet/rpc/util.h \
-  wallet/rpc/wallet.h \
   wallet/salvage.h \
   wallet/scriptpubkeyman.h \
-  wallet/spend.h \
   wallet/sqlite.h \
   wallet/transaction.h \
   wallet/types.h \
   wallet/wallet.h \
   wallet/walletdb.h \
-  wallet/wallettool.h \
   wallet/walletutil.h \
-  walletinitinterface.h \
+  walletdb.h \
+  walletinitflags.h \
+  walletmodel.h \
+  walletmodel.h \
+  walletview.h \
+  walletview.h \
   warnings.h \
+  worker.h \
   zmq/zmqabstractnotifier.h \
+  zmq/zmqconfig.h\
   zmq/zmqnotificationinterface.h \
   zmq/zmqpublishnotifier.h \
   zmq/zmqrpc.h \
   zmq/zmqutil.h
-
 
 obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
@@ -358,122 +497,154 @@ obj/build.h: FORCE
 	  "$(abs_top_srcdir)"
 libglobalboost_util_a-clientversion.$(OBJEXT): obj/build.h
 
-# node #
-libglobalboost_node_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(BOOST_CPPFLAGS) $(MINIUPNPC_CPPFLAGS) $(NATPMP_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
-libglobalboost_node_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libglobalboost_node_a_SOURCES = \
+# server #
+libglobalboost_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CPPFLAGS) $(EVENT_PTHREADS_CPPFLAGS)
+libglobalboost_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libglobalboost_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
   banman.cpp \
-  blockencodings.cpp \
   blockfilter.cpp \
+  blockindexstats.cpp \
+  blockindex.cpp \
+  blockstorage.cpp \
+  blockvalidation.cpp \
+  block_index.cpp \
+  blockvalidator.cpp \
   chain.cpp \
+  checkpoints.cpp \
   consensus/tx_verify.cpp \
+  consensus/validation.h \
   dbwrapper.cpp \
+  deploymentinfo.cpp \
   deploymentstatus.cpp \
+  eventmanager.cpp \
+  events.cpp \
   flatfile.cpp \
-  headerssync.cpp \
-  httprpc.cpp \
-  httpserver.cpp \
+  flat_db.cpp \
+  flat_db_sqlite.cpp \
+  flat_db_leveldb.cpp \
+  flatdataset.cpp \
+  flushablestorage.cpp \
   i2p.cpp \
   index/base.cpp \
   index/blockfilterindex.cpp \
   index/coinstatsindex.cpp \
-  index/txindex.cpp \
   init.cpp \
-  kernel/chain.cpp \
+  init/common.cpp \
+  init/globalboostd.cpp \
+  kernel/blockmanager.cpp \
+  kernel/chainparams.cpp \
   kernel/checks.cpp \
   kernel/coinstats.cpp \
   kernel/context.cpp \
-  kernel/cs_main.cpp \
+  kernel/mempool.cpp \
   kernel/mempool_persist.cpp \
-  mapport.cpp \
+  kernel/signals.cpp \
+  kernel/validation.cpp \
+  kernel/warnings.cpp \
+  logging.cpp \
+  logging/timer.cpp \
+  mapfile.cpp \
+  miner.cpp \
+  modules/mp_node_rpc.cpp \
+  modules/mp_network_config.cpp \
+  modules/mp_networkmanager.cpp \
+  modules/mp_p2p_message_handler.cpp \
+  modules/mp_message_router.cpp \
   net.cpp \
-  net_processing.cpp \
-  netgroup.cpp \
-  node/blockmanager_args.cpp \
+  netaddress.cpp \
+  netbase.cpp \
+  netmessagemaker.cpp \
   node/blockstorage.cpp \
   node/caches.cpp \
   node/chainstate.cpp \
-  node/chainstatemanager_args.cpp \
-  node/coin.cpp \
-  node/coins_view_args.cpp \
-  node/connection_types.cpp \
   node/context.cpp \
-  node/database_args.cpp \
   node/eviction.cpp \
-  node/interface_ui.cpp \
-  node/interfaces.cpp \
-  node/mempool_args.cpp \
-  node/mempool_persist_args.cpp \
-  node/miner.cpp \
-  node/minisketchwrapper.cpp \
+  node/mini_node.cpp \
   node/psbt.cpp \
-  node/transaction.cpp \
-  node/txreconciliation.cpp \
-  node/utxo_snapshot.cpp \
-  node/validation_cache_args.cpp \
+  node/tx_memory_pool.cpp \
+  node/txdownloadman.cpp \
+  node/validation.cpp \
   noui.cpp \
+  p2p_message_handler.cpp \
+  p2p_message_router.cpp \
+  p2p_network_config.cpp \
+  p2p_networkmanager.cpp \
+  policy/feerate.cpp \
   policy/fees.cpp \
-  policy/fees_args.cpp \
   policy/packages.cpp \
+  policy/policy.cpp \
   policy/rbf.cpp \
   policy/settings.cpp \
   pow.cpp \
-  rest.cpp \
   rpc/blockchain.cpp \
-  rpc/fees.cpp \
+  rpc/blockchain_json.cpp \
+  rpc/command.cpp \
+  rpc/connection_info.cpp \
+  rpc/debug.cpp \
+  rpc/describe.cpp \
+  rpc/external_signer.cpp \
+  rpc/fee_estimate.cpp \
+  rpc/jsonrpc.cpp \
   rpc/mempool.cpp \
-  rpc/mining.cpp \
+  rpc/mempool_fee_estimate.cpp \
+  rpc/misc.cpp \
+  rpc/moneypot.cpp \
   rpc/net.cpp \
-  rpc/node.cpp \
-  rpc/output_script.cpp \
+  rpc/peer_connection.cpp \
+  rpc/protocol.cpp \
   rpc/rawtransaction.cpp \
+  rpc/rawtransaction_util.cpp \
   rpc/server.cpp \
-  rpc/server_util.cpp \
   rpc/signmessage.cpp \
-  rpc/txoutproof.cpp \
-  script/sigcache.cpp \
-  shutdown.cpp \
+  rpc/signrawtransaction.cpp \
+  rpc/system.cpp \
+  rpc/util.cpp \
   signet.cpp \
-  timedata.cpp \
+  spork.cpp \
+  syncstatus.cpp \
+  telemetry.cpp \
   torcontrol.cpp \
+  torexitaddresses.cpp \
   txdb.cpp \
+  txglobaldata.cpp \
   txmempool.cpp \
-  txorphanage.cpp \
-  txrequest.cpp \
+  txmemorybuffer.cpp \
+  txmessages.cpp \
+  txorphanpool.cpp \
+  txpool.cpp \
+  txpoolmgr.cpp \
+  txpoolstats.cpp \
+  txqueue.cpp \
+  txrelay.cpp \
+  txspeedometer.cpp \
+  txvalidationstate.cpp \
+  txvault.cpp \
   validation.cpp \
   validationinterface.cpp \
-  versionbits.cpp \
-  $(GLOBALBOOST_CORE_H)
-
-if ENABLE_WALLET
-libglobalboost_node_a_SOURCES += wallet/init.cpp
-libglobalboost_node_a_CPPFLAGS += $(BDB_CPPFLAGS)
-endif
-if !ENABLE_WALLET
-libglobalboost_node_a_SOURCES += dummywallet.cpp
-endif
-#
-
-# zmq #
-if ENABLE_ZMQ
-libglobalboost_zmq_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(ZMQ_CFLAGS)
-libglobalboost_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libglobalboost_zmq_a_SOURCES = \
+  validationstate.cpp \
+  warnings.cpp \
   zmq/zmqabstractnotifier.cpp \
+  zmq/zmqconfig.cpp \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp \
   zmq/zmqrpc.cpp \
-  zmq/zmqutil.cpp
-endif
+  zmq/zmqutil.cpp \
+  $(GLOBALBOOST_CORE_H)
+
 #
 
 # wallet #
-libglobalboost_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(BOOST_CPPFLAGS) $(BDB_CPPFLAGS) $(SQLITE_CFLAGS)
+if ENABLE_WALLET
+
+libglobalboost_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(BOOST_CPPFLAGS) $(BDB_CPPFLAGS) $(SQLITE_CPPFLAGS)
 libglobalboost_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libglobalboost_wallet_a_SOURCES = \
+  interfaces/wallet.cpp \
+  wallet/bdb.cpp \
   wallet/coincontrol.cpp \
+  wallet/coinselection.cpp \
   wallet/context.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
@@ -481,36 +652,22 @@ libglobalboost_wallet_a_SOURCES = \
   wallet/external_signer_scriptpubkeyman.cpp \
   wallet/feebumper.cpp \
   wallet/fees.cpp \
-  wallet/interfaces.cpp \
+  wallet/ismine.cpp \
   wallet/load.cpp \
-  wallet/receive.cpp \
-  wallet/rpc/addresses.cpp \
   wallet/rpc/backup.cpp \
-  wallet/rpc/coins.cpp \
   wallet/rpc/encrypt.cpp \
   wallet/rpc/spend.cpp \
-  wallet/rpc/signmessage.cpp \
   wallet/rpc/transactions.cpp \
   wallet/rpc/util.cpp \
-  wallet/rpc/wallet.cpp \
+  wallet/salvage.cpp \
   wallet/scriptpubkeyman.cpp \
-  wallet/spend.cpp \
+  wallet/sqlite.cpp \
   wallet/transaction.cpp \
   wallet/wallet.cpp \
   wallet/walletdb.cpp \
   wallet/walletutil.cpp \
-  wallet/coinselection.cpp \
   $(GLOBALBOOST_CORE_H)
 
-if USE_SQLITE
-libglobalboost_wallet_a_SOURCES += wallet/sqlite.cpp
-endif
-if USE_BDB
-libglobalboost_wallet_a_SOURCES += wallet/bdb.cpp wallet/salvage.cpp
-endif
-#
-
-# wallet tool #
 libglobalboost_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(BOOST_CPPFLAGS)
 libglobalboost_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libglobalboost_wallet_tool_a_SOURCES = \
@@ -558,7 +715,9 @@ crypto_libglobalboost_crypto_base_la_SOURCES = \
   crypto/sha512.h \
   crypto/siphash.cpp \
   crypto/siphash.h \
-  crypto/yescrypt/yescrypt.c
+  crypto/yescrypt/yescrypt.c \
+  crypto/yescrypt/yescrypt_cpp.cpp \
+  crypto/yescrypt/yescrypt_cpp.h
 
 noinst_HEADERS = \
   crypto/yescrypt/sha256.h \
@@ -593,551 +752,261 @@ crypto_libglobalboost_crypto_avx2_la_CXXFLAGS += $(AVX2_CXXFLAGS)
 crypto_libglobalboost_crypto_avx2_la_CPPFLAGS += -DENABLE_AVX2
 crypto_libglobalboost_crypto_avx2_la_SOURCES = crypto/sha256_avx2.cpp
 
-# See explanation for -static in crypto_libglobalboost_crypto_base_la's LDFLAGS and
-# CXXFLAGS above
-crypto_libglobalboost_crypto_x86_shani_la_LDFLAGS = $(AM_LDFLAGS) -static
-crypto_libglobalboost_crypto_x86_shani_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
-crypto_libglobalboost_crypto_x86_shani_la_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libglobalboost_crypto_x86_shani_la_CXXFLAGS += $(X86_SHANI_CXXFLAGS)
-crypto_libglobalboost_crypto_x86_shani_la_CPPFLAGS += -DENABLE_X86_SHANI
-crypto_libglobalboost_crypto_x86_shani_la_SOURCES = crypto/sha256_x86_shani.cpp
+noinst_LTLIBRARIES += $(LIBGLOBALBOOST_CRYPTO_BASE)
 
-# See explanation for -static in crypto_libglobalboost_crypto_base_la's LDFLAGS and
-# CXXFLAGS above
-crypto_libglobalboost_crypto_arm_shani_la_LDFLAGS = $(AM_LDFLAGS) -static
-crypto_libglobalboost_crypto_arm_shani_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
-crypto_libglobalboost_crypto_arm_shani_la_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libglobalboost_crypto_arm_shani_la_CXXFLAGS += $(ARM_SHANI_CXXFLAGS)
-crypto_libglobalboost_crypto_arm_shani_la_CPPFLAGS += -DENABLE_ARM_SHANI
-crypto_libglobalboost_crypto_arm_shani_la_SOURCES = crypto/sha256_arm_shani.cpp
-#
+noinst_LTLIBRARIES += crypto/libglobalboost_crypto_sse41.la
+noinst_LTLIBRARIES += crypto/libglobalboost_crypto_avx2.la
 
-# consensus #
+libglobalboost_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
+libglobalboost_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libglobalboost_common_a_SOURCES = \
+  base58.cpp \
+  bech32.cpp \
+  bloom.cpp \
+  chainparams.cpp \
+  coins.cpp \
+  coinscache.cpp \
+  compressor.cpp \
+  core_read.cpp \
+  core_write.cpp \
+  key.cpp \
+  key_io.cpp \
+  keystore.cpp \
+  message.cpp \
+  netaddress.cpp \
+  netbase.cpp \
+  net_permissions.cpp \
+  outputtype.cpp \
+  policy/feerate.cpp \
+  protocol.cpp \
+  psbt.cpp \
+  rpc/rawtransaction_util.cpp \
+  rpc/util.cpp \
+  script/descriptor.cpp \
+  script/interpreter.cpp \
+  script/script.cpp \
+  script/scripttype.cpp \
+  script/sign.cpp \
+  script/signingprovider.cpp \
+  script/standard.cpp \
+  script/solidity_utils.cpp \
+  versionbitsinfo.cpp \
+  $(GLOBALBOOST_CORE_H)
+
 libglobalboost_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
 libglobalboost_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libglobalboost_consensus_a_SOURCES = \
+  amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
   consensus/amount.h \
+  consensus/checks.cpp \
+  consensus/consensus.h \
   consensus/merkle.cpp \
   consensus/merkle.h \
   consensus/params.h \
-  consensus/tx_check.cpp \
+  consensus/tx_verify.cpp \
+  consensus/tx_verify.h \
   consensus/validation.h \
-  hash.cpp \
+  crypto/hash.cpp \
+  crypto/hash.h \
   hash.h \
-  prevector.h \
-  primitives/block.cpp \
   primitives/block.h \
-  primitives/transaction.cpp \
   primitives/transaction.h \
   pubkey.cpp \
   pubkey.h \
-  script/globalboostconsensus.cpp \
   script/interpreter.cpp \
   script/interpreter.h \
   script/script.cpp \
   script/script.h \
-  script/script_error.cpp \
-  script/script_error.h \
+  script/scripttype.h \
   serialize.h \
   span.h \
   tinyformat.h \
   uint256.cpp \
   uint256.h \
   util/strencodings.cpp \
-  util/strencodings.h \
-  version.h
-#
+  util/strencodings.h
 
-# common #
-libglobalboost_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(BOOST_CPPFLAGS)
-libglobalboost_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libglobalboost_common_a_SOURCES = \
-  base58.cpp \
-  bech32.cpp \
-  chainparams.cpp \
-  coins.cpp \
-  common/bloom.cpp \
-  common/init.cpp \
-  common/interfaces.cpp \
-  common/run_command.cpp \
-  compressor.cpp \
-  core_read.cpp \
-  core_write.cpp \
-  deploymentinfo.cpp \
-  external_signer.cpp \
-  init/common.cpp \
-  kernel/chainparams.cpp \
-  key.cpp \
-  key_io.cpp \
-  merkleblock.cpp \
-  net_types.cpp \
-  netaddress.cpp \
-  netbase.cpp \
-  net_permissions.cpp \
-  outputtype.cpp \
-  policy/feerate.cpp \
-  policy/policy.cpp \
-  protocol.cpp \
-  psbt.cpp \
-  rpc/external_signer.cpp \
-  rpc/rawtransaction_util.cpp \
-  rpc/request.cpp \
-  rpc/util.cpp \
-  scheduler.cpp \
-  script/descriptor.cpp \
-  script/miniscript.cpp \
-  script/sign.cpp \
-  script/signingprovider.cpp \
-  script/standard.cpp \
-  warnings.cpp \
-  $(GLOBALBOOST_CORE_H)
-
-if USE_LIBEVENT
-libglobalboost_common_a_CPPFLAGS += $(EVENT_CFLAGS)
-libglobalboost_common_a_SOURCES += common/url.cpp
-endif
-#
-
-# util #
 libglobalboost_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
 libglobalboost_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libglobalboost_util_a_SOURCES = \
-  support/lockedpool.cpp \
-  chainparamsbase.cpp \
-  clientversion.cpp \
-  logging.cpp \
-  random.cpp \
-  randomenv.cpp \
+  support/allocators/mt_pooled_secure.cpp \
+  support/allocators/mt_pooled_secure.h \
+  support/allocators/pooled_secure.cpp \
+  support/allocators/pooled_secure.h \
+  support/allocators/secure.cpp \
+  support/allocators/secure.h \
+  support/allocators/zeroafterfree.h \
   support/cleanse.cpp \
+  support/cleanse.h \
+  support/events.cpp \
+  support/events.h \
+  support/lockedpool.cpp \
+  support/lockedpool.h \
+  clientversion.cpp \
+  common/args.cpp \
+  common/args.h \
+  common/init.cpp \
+  common/init.h \
+  common/messages.cpp \
+  common/messages.h \
+  common/run_tests.cpp \
+  common/run_tests.h \
+  common/settings.cpp \
+  common/settings.h \
+  common/signmessage.cpp \
+  common/signmessage.h \
+  common/system.cpp \
+  common/system.h \
+  common/url.cpp \
+  common/url.h \
+  compat/compat.h \
+  compat/glibcxx_sanity_test.cpp \
+  compat/strnlen.cpp \
+  fs.cpp \
+  fs.h \
+  logging.cpp \
+  logging.h \
+  logging/timer.cpp \
+  logging/timer.h \
+  random.cpp \
+  random.h \
+  randomenv.cpp \
+  randomenv.h \
+  serialize.h \
+  stacktraces.cpp \
+  stacktraces.h \
+  support/cleanse.cpp \
+  support/cleanse.h \
   sync.cpp \
+  sync.h \
+  threadinterrupt.cpp \
+  threadinterrupt.h \
+  threadsafety.h \
+  threadutil.cpp \
+  threadutil.h \
+  time.cpp \
+  time.h \
+  timedata.cpp \
+  timedata.h \
   util/asmap.cpp \
-  util/bip32.cpp \
-  util/bytevectorhash.cpp \
+  util/asmap.h \
+  util/bip32path.cpp \
+  util/bip32path.h \
+  util/bytevectorhash.h \
   util/check.cpp \
-  util/error.cpp \
-  util/exception.cpp \
+  util/check.h \
+  util/epochguard.h \
+  util/exception.h \
+  util/fastrange.h \
   util/fees.cpp \
-  util/fs.cpp \
-  util/fs_helpers.cpp \
-  util/getuniquepath.cpp \
-  util/hasher.cpp \
-  util/sock.cpp \
-  util/syserror.cpp \
-  util/system.cpp \
+  util/fees.h \
+  util/getuniquepath.h \
+  util/golombrice.h \
+  util/hash.cpp \
+  util/hash.h \
+  util/hashwrapper.h \
+  util/hasher.h \
+  util/macros.h \
   util/message.cpp \
+  util/message.h \
   util/moneystr.cpp \
-  util/rbf.cpp \
+  util/moneystr.h \
+  util/overrides.h \
+  util/ranges.h \
   util/readwritefile.cpp \
-  util/settings.cpp \
-  util/thread.cpp \
-  util/threadinterrupt.cpp \
-  util/threadnames.cpp \
-  util/serfloat.cpp \
+  util/readwritefile.h \
+  util/result.h \
+  util/serfloat.h \
+  util/serialize.h \
+  util/sock.cpp \
+  util/sock.h \
   util/spanparsing.cpp \
+  util/spanparsing.h \
   util/strencodings.cpp \
+  util/strencodings.h \
   util/string.cpp \
-  util/syscall_sandbox.cpp \
+  util/string.h \
+  util/system.cpp \
+  util/system.h \
   util/time.cpp \
-  util/tokenpipe.cpp \
+  util/time.h \
+  util/transaction.cpp \
+  util/transaction.h \
+  util/translation.h \
+  util/types.h \
+  util/url.cpp \
+  util/url.h \
+  util/vector.h \
+  util/vector_hash.h \
   $(GLOBALBOOST_CORE_H)
-#
 
-# cli #
 libglobalboost_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
 libglobalboost_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libglobalboost_cli_a_SOURCES = \
-  compat/stdin.h \
-  compat/stdin.cpp \
   rpc/client.cpp \
+  rpc/client.h \
   $(GLOBALBOOST_CORE_H)
 
 nodist_libglobalboost_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
-# globalboostd & globalboost-node binaries #
-globalboost_daemon_sources = globalboostd.cpp
-globalboost_bin_cppflags = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
-globalboost_bin_cxxflags = $(AM_CXXFLAGS) $(PIE_FLAGS)
-globalboost_bin_ldflags = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+libglobalboost_consensus_a_SOURCES += \
+  crypto/sha256.cpp \
+  crypto/sha256.h
 
-if TARGET_WINDOWS
-globalboost_daemon_sources += globalboostd-res.rc
-endif
-
-globalboost_bin_ldadd = \
-  $(LIBGLOBALBOOST_WALLET) \
-  $(LIBGLOBALBOOST_COMMON) \
-  $(LIBGLOBALBOOST_UTIL) \
-  $(LIBUNIVALUE) \
-  $(LIBGLOBALBOOST_ZMQ) \
-  $(LIBGLOBALBOOST_CONSENSUS) \
-  $(LIBGLOBALBOOST_CRYPTO) \
-  $(LIBLEVELDB) \
-  $(LIBMEMENV) \
-  $(LIBSECP256K1)
-
-globalboost_bin_ldadd += $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS)
-
-globalboostd_SOURCES = $(globalboost_daemon_sources) init/globalboostd.cpp
-globalboostd_CPPFLAGS = $(globalboost_bin_cppflags)
-globalboostd_CXXFLAGS = $(globalboost_bin_cxxflags)
-globalboostd_LDFLAGS = $(globalboost_bin_ldflags)
-globalboostd_LDADD = $(LIBGLOBALBOOST_NODE) $(globalboost_bin_ldadd)
-
-globalboost_node_SOURCES = $(globalboost_daemon_sources) init/globalboost-node.cpp
-globalboost_node_CPPFLAGS = $(globalboost_bin_cppflags)
-globalboost_node_CXXFLAGS = $(globalboost_bin_cxxflags)
-globalboost_node_LDFLAGS = $(globalboost_bin_ldflags)
-globalboost_node_LDADD = $(LIBGLOBALBOOST_NODE) $(globalboost_bin_ldadd) $(LIBGLOBALBOOST_IPC) $(LIBMULTIPROCESS_LIBS)
-
-# globalboost-cli binary #
-globalboost_cli_SOURCES = globalboost-cli.cpp
-globalboost_cli_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(EVENT_CFLAGS)
-globalboost_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-globalboost_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
-
-if TARGET_WINDOWS
-globalboost_cli_SOURCES += globalboost-cli-res.rc
-endif
-
-globalboost_cli_LDADD = \
-  $(LIBGLOBALBOOST_CLI) \
-  $(LIBUNIVALUE) \
-  $(LIBGLOBALBOOST_COMMON) \
-  $(LIBGLOBALBOOST_UTIL) \
-  $(LIBGLOBALBOOST_CRYPTO)
-
-globalboost_cli_LDADD += $(EVENT_LIBS)
 #
 
-# globalboost-tx binary #
-globalboost_tx_SOURCES = globalboost-tx.cpp
-globalboost_tx_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
-globalboost_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-globalboost_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
-
-if TARGET_WINDOWS
-globalboost_tx_SOURCES += globalboost-tx-res.rc
-endif
-
-globalboost_tx_LDADD = \
-  $(LIBUNIVALUE) \
-  $(LIBGLOBALBOOST_COMMON) \
-  $(LIBGLOBALBOOST_UTIL) \
-  $(LIBGLOBALBOOST_CONSENSUS) \
-  $(LIBGLOBALBOOST_CRYPTO) \
-  $(LIBSECP256K1)
-#
-
-# globalboost-wallet binary #
-globalboost_wallet_SOURCES = globalboost-wallet.cpp
-globalboost_wallet_SOURCES += init/globalboost-wallet.cpp
-globalboost_wallet_CPPFLAGS = $(globalboost_bin_cppflags)
-globalboost_wallet_CXXFLAGS = $(globalboost_bin_cxxflags)
-globalboost_wallet_LDFLAGS = $(globalboost_bin_ldflags)
-globalboost_wallet_LDADD = \
-  $(LIBGLOBALBOOST_WALLET_TOOL) \
-  $(LIBGLOBALBOOST_WALLET) \
-  $(LIBGLOBALBOOST_COMMON) \
-  $(LIBGLOBALBOOST_UTIL) \
-  $(LIBUNIVALUE) \
-  $(LIBGLOBALBOOST_CONSENSUS) \
-  $(LIBGLOBALBOOST_CRYPTO) \
-  $(LIBSECP256K1) \
-  $(BDB_LIBS) \
-  $(SQLITE_LIBS)
-
-if TARGET_WINDOWS
-globalboost_wallet_SOURCES += globalboost-wallet-res.rc
-endif
-#
-
-# globalboost-util binary #
-globalboost_util_SOURCES = globalboost-util.cpp
-globalboost_util_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
-globalboost_util_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-globalboost_util_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
-
-if TARGET_WINDOWS
-globalboost_util_SOURCES += globalboost-util-res.rc
-endif
-
-globalboost_util_LDADD = \
-  $(LIBGLOBALBOOST_COMMON) \
-  $(LIBGLOBALBOOST_UTIL) \
-  $(LIBUNIVALUE) \
-  $(LIBGLOBALBOOST_CONSENSUS) \
-  $(LIBGLOBALBOOST_CRYPTO) \
-  $(LIBSECP256K1)
-#
-
-# globalboost-chainstate binary #
-globalboost_chainstate_SOURCES = globalboost-chainstate.cpp
-globalboost_chainstate_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES) $(BOOST_CPPFLAGS)
-globalboost_chainstate_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-
-globalboost_chainstate_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(PTHREAD_FLAGS) $(LIBTOOL_APP_LDFLAGS) -static
-globalboost_chainstate_LDADD = $(LIBGLOBALBOOSTKERNEL)
-
-# libtool is unable to calculate this indirect dependency, presumably because it's a subproject.
-# libsecp256k1 only needs to be linked in when libglobalboostkernel is static.
-globalboost_chainstate_LDADD += $(LIBSECP256K1)
-#
-
-# globalboostkernel library #
-if BUILD_GLOBALBOOST_KERNEL_LIB
-lib_LTLIBRARIES += $(LIBGLOBALBOOSTKERNEL)
-
-libglobalboostkernel_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) $(PTHREAD_FLAGS)
-libglobalboostkernel_la_LIBADD = $(LIBGLOBALBOOST_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) $(LIBSECP256K1)
-libglobalboostkernel_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_GLOBALBOOST_INTERNAL $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) -I$(srcdir)/$(UNIVALUE_INCLUDE_DIR_INT)
-
-# libglobalboostkernel requires default symbol visibility, explicitly specify that
-# here so that things still work even when user configures with
-#   --enable-reduce-exports
-#
-# Note this is a quick hack that will be removed as we incrementally define what
-# to export from the library.
-libglobalboostkernel_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -fvisibility=default
-
-# TODO: libglobalboostkernel is a work in progress consensus engine library, as more
-#       and more modules are decoupled from the consensus engine, this list will
-#       shrink to only those which are absolutely necessary.
-libglobalboostkernel_la_SOURCES = \
-  kernel/globalboostkernel.cpp \
-  arith_uint256.cpp \
-  chain.cpp \
-  chainparamsbase.cpp \
-  chainparams.cpp \
-  clientversion.cpp \
-  coins.cpp \
-  compressor.cpp \
-  consensus/merkle.cpp \
-  consensus/tx_check.cpp \
-  consensus/tx_verify.cpp \
-  core_read.cpp \
-  dbwrapper.cpp \
-  deploymentinfo.cpp \
-  deploymentstatus.cpp \
-  flatfile.cpp \
-  hash.cpp \
-  kernel/chain.cpp \
-  kernel/checks.cpp \
-  kernel/chainparams.cpp \
-  kernel/coinstats.cpp \
-  kernel/context.cpp \
-  kernel/cs_main.cpp \
-  kernel/mempool_persist.cpp \
-  key.cpp \
-  logging.cpp \
-  node/blockstorage.cpp \
-  node/chainstate.cpp \
-  node/interface_ui.cpp \
-  node/utxo_snapshot.cpp \
-  policy/feerate.cpp \
-  policy/fees.cpp \
-  policy/packages.cpp \
-  policy/policy.cpp \
-  policy/rbf.cpp \
-  policy/settings.cpp \
-  pow.cpp \
-  primitives/block.cpp \
-  primitives/transaction.cpp \
-  pubkey.cpp \
-  random.cpp \
-  randomenv.cpp \
-  scheduler.cpp \
-  script/interpreter.cpp \
-  script/script.cpp \
-  script/script_error.cpp \
-  script/sigcache.cpp \
-  script/standard.cpp \
-  shutdown.cpp \
-  signet.cpp \
-  support/cleanse.cpp \
-  support/lockedpool.cpp \
-  sync.cpp \
-  txdb.cpp \
-  txmempool.cpp \
-  uint256.cpp \
-  util/check.cpp \
-  util/exception.cpp \
-  util/fs.cpp \
-  util/fs_helpers.cpp \
-  util/getuniquepath.cpp \
-  util/hasher.cpp \
-  util/moneystr.cpp \
-  util/rbf.cpp \
-  util/serfloat.cpp \
-  util/settings.cpp \
-  util/strencodings.cpp \
-  util/string.cpp \
-  util/syscall_sandbox.cpp \
-  util/syserror.cpp \
-  util/system.cpp \
-  util/thread.cpp \
-  util/threadnames.cpp \
-  util/time.cpp \
-  util/tokenpipe.cpp \
-  validation.cpp \
-  validationinterface.cpp \
-  versionbits.cpp \
-  warnings.cpp
-
-# Required for obj/build.h to be generated first.
-# More details: https://www.gnu.org/software/automake/manual/html_node/Built-Sources-Example.html
-libglobalboostkernel_la-clientversion.l$(OBJEXT): obj/build.h
-endif # BUILD_GLOBALBOOST_KERNEL_LIB
-#
-
-# globalboostconsensus library #
-if BUILD_GLOBALBOOST_LIBS
-lib_LTLIBRARIES += $(LIBGLOBALBOOSTCONSENSUS)
-
-include_HEADERS = script/globalboostconsensus.h
-libglobalboostconsensus_la_SOURCES = support/cleanse.cpp $(crypto_libglobalboost_crypto_base_la_SOURCES) $(libglobalboost_consensus_a_SOURCES)
-
-libglobalboostconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libglobalboostconsensus_la_LIBADD = $(LIBSECP256K1)
-libglobalboostconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_CONFIG_INCLUDES) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_GLOBALBOOST_INTERNAL
-libglobalboostconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -fomit-frame-pointer
-
-endif
-#
-
-CTAES_DIST =  crypto/ctaes/bench.c
-CTAES_DIST += crypto/ctaes/ctaes.c
-CTAES_DIST += crypto/ctaes/ctaes.h
-CTAES_DIST += crypto/ctaes/README.md
-CTAES_DIST += crypto/ctaes/test.c
-
-YESCRYPT_DIST = crypto/yescrypt/yescrypt-platform.c
-YESCRYPT_DIST += crypto/yescrypt/yescrypt-opt.c
-YESCRYPT_DIST += crypto/yescrypt/yescrypt-simd.c
-
-CLEANFILES = $(EXTRA_LIBRARIES)
-
-CLEANFILES += *.gcda *.gcno
-CLEANFILES += compat/*.gcda compat/*.gcno
-CLEANFILES += consensus/*.gcda consensus/*.gcno
-CLEANFILES += crc32c/src/*.gcda crc32c/src/*.gcno
-CLEANFILES += crypto/*.gcda crypto/*.gcno
-CLEANFILES += index/*.gcda index/*.gcno
-CLEANFILES += interfaces/*.gcda interfaces/*.gcno
-CLEANFILES += node/*.gcda node/*.gcno
-CLEANFILES += policy/*.gcda policy/*.gcno
-CLEANFILES += primitives/*.gcda primitives/*.gcno
-CLEANFILES += rpc/*.gcda rpc/*.gcno
-CLEANFILES += script/*.gcda script/*.gcno
-CLEANFILES += support/*.gcda support/*.gcno
-CLEANFILES += univalue/*.gcda univalue/*.gcno
-CLEANFILES += util/*.gcda util/*.gcno
-CLEANFILES += wallet/*.gcda wallet/*.gcno
-CLEANFILES += wallet/test/*.gcda wallet/test/*.gcno
-CLEANFILES += zmq/*.gcda zmq/*.gcno
-CLEANFILES += obj/build.h
-
-EXTRA_DIST = $(CTAES_DIST) $(YESCRYPT_DIST)
-
-
-config/globalboost-config.h: config/stamp-h1
-	@$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-config/stamp-h1: $(top_srcdir)/$(subdir)/config/globalboost-config.h.in $(top_builddir)/config.status
-	$(AM_V_at)$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-$(top_srcdir)/$(subdir)/config/globalboost-config.h.in:  $(am__configure_deps)
-	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/globalboost-config.h.in
-
-clean-local:
-	-$(MAKE) -C secp256k1 clean
-	-rm -f leveldb/*/*.gcda leveldb/*/*.gcno leveldb/helpers/memenv/*.gcda leveldb/helpers/memenv/*.gcno
-	-rm -f config.h
-	-rm -rf test/__pycache__
-
-.rc.o:
-	@test -f $(WINDRES)
-	## FIXME: How to get the appropriate modulename_CPPFLAGS in here?
-	$(AM_V_GEN) $(WINDRES) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) -DWINDRES_PREPROC -i $< -o $@
-
-check-symbols: $(bin_PROGRAMS)
-	@echo "Running symbol and dynamic library checks..."
-	$(AM_V_at) $(PYTHON) $(top_srcdir)/contrib/devtools/symbol-check.py $(bin_PROGRAMS)
-
-check-security: $(bin_PROGRAMS)
-if HARDEN
-	@echo "Checking binary security..."
-	$(AM_V_at) $(PYTHON) $(top_srcdir)/contrib/devtools/security-check.py $(bin_PROGRAMS)
-endif
-
-libglobalboost_ipc_mpgen_input = \
-  ipc/capnp/echo.capnp \
-  ipc/capnp/init.capnp
-EXTRA_DIST += $(libglobalboost_ipc_mpgen_input)
-%.capnp:
-
-# Explicitly list dependencies on generated headers as described in
-# https://www.gnu.org/software/automake/manual/html_node/Built-Sources-Example.html#Recording-Dependencies-manually
-ipc/capnp/libglobalboost_ipc_a-protocol.$(OBJEXT): $(libglobalboost_ipc_mpgen_input:=.h)
-
-if BUILD_MULTIPROCESS
-LIBGLOBALBOOST_IPC=libglobalboost_ipc.a
-libglobalboost_ipc_a_SOURCES = \
-  ipc/capnp/context.h \
-  ipc/capnp/init-types.h \
-  ipc/capnp/protocol.cpp \
-  ipc/capnp/protocol.h \
-  ipc/context.h \
-  ipc/exception.h \
-  ipc/interfaces.cpp \
-  ipc/process.cpp \
-  ipc/process.h \
-  ipc/protocol.h
-libglobalboost_ipc_a_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBALBOOST_INCLUDES)
-libglobalboost_ipc_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(LIBMULTIPROCESS_CFLAGS)
-
-include $(MPGEN_PREFIX)/include/mpgen.mk
-libglobalboost_ipc_mpgen_output = \
-  $(libglobalboost_ipc_mpgen_input:=.c++) \
-  $(libglobalboost_ipc_mpgen_input:=.h) \
-  $(libglobalboost_ipc_mpgen_input:=.proxy-client.c++) \
-  $(libglobalboost_ipc_mpgen_input:=.proxy-server.c++) \
-  $(libglobalboost_ipc_mpgen_input:=.proxy-types.c++) \
-  $(libglobalboost_ipc_mpgen_input:=.proxy-types.h) \
-  $(libglobalboost_ipc_mpgen_input:=.proxy.h)
-nodist_libglobalboost_ipc_a_SOURCES = $(libglobalboost_ipc_mpgen_output)
-CLEANFILES += $(libglobalboost_ipc_mpgen_output)
-endif
-
-%.raw.h: %.raw
-	@$(MKDIR_P) $(@D)
-	@{ \
-	 echo "static unsigned const char $(*F)_raw[] = {" && \
-	 $(HEXDUMP) -v -e '8/1 "0x%02x, "' -e '"\n"' $< | $(SED) -e 's/0x  ,//g' && \
-	 echo "};"; \
-	} > "$@.new" && mv -f "$@.new" "$@"
-	@echo "Generated $@"
-
-include Makefile.minisketch.include
-
-include Makefile.crc32c.include
 include Makefile.leveldb.include
-
-include Makefile.test_util.include
-include Makefile.test_fuzz.include
-
-include Makefile.test.include
-
-if ENABLE_BENCH
-include Makefile.bench.include
-endif
+#
 
 if ENABLE_QT
 include Makefile.qt.include
 endif
+#
 
-if ENABLE_QT_TESTS
-include Makefile.qttest.include
+if ENABLE_TESTS
+include Makefile.test.include
+endif
+#
+
+if ENABLE_BENCH
+include Makefile.bench.include
+endif
+#
+
+if ENABLE_FUZZ_BINARY
+include Makefile.fuzz.include
 endif
 
-include Makefile.univalue.include
+CLEANFILES = $(EXTRA_LIBRARIES)
+
+CLEANFILES += *.gcda *.gcno
+CLEANFILES += compat/glibc_sanity_test.raw compat/glibc_sanity_test
+CLEANFILES += obj/build.h
+
+EXTRA_DIST = Makefile.leveldb.include Makefile.test.include Makefile.bench.include Makefile.qt.include Makefile.qttest.include Makefile.fuzz.include
+
+
+distclean-local:
+	-$(MAKE) -C secp256k1 distclean
+	-rm -f secp256k1/libsecp256k1.la secp256k1/libsecp256k1.pc
+
+distclean-local: clean-docs
+
+clean-local:
+	-$(MAKE) -C secp256k1 clean
+
+.rc.o:
+	@test -f $(RC) || (echo "windres not found, but is required to compile bitcoin core for windows. Terminating build."; exit 1)
+	$(AM_V_GEN) $(RC) -DWINDRES_PREPROC -i $< -o $@
+.res.o:
+	@test -f $(RC) || (echo "windres not found, but is required to compile bitcoin core for windows. Terminating build."; exit 1)
+	$(AM_V_GEN) $(RC) -DWINDRES_PREPROC -i $< -o $@
+
+%.pb.cc %.pb.h: %.proto
+	@test -f $(PROTOC) || (echo "protoc not found, but is required to compile bitcoin core. Terminating build."; exit 1)
+	$(AM_V_GEN) $(PROTOC) --cpp_out=$(@D) --python_out=$(@D) $<
+
+include Makefile.leveldb.include
