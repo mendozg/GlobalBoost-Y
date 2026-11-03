@@ -4,36 +4,32 @@
 
 #include <crypto/mldsa44.h>
 
-#include <span>
-#include <vector>
-
 namespace crypto {
 namespace mldsa44 {
 
 bool GenerateKeyPair(KeyPair& keypair)
 {
-    // This is a scaffold only.
-    // Real ML-DSA-44 key generation must be implemented with a vetted FIPS 204 backend.
-    // Do not return success without a real implementation.
-    (void)keypair;
+    // Fail closed until a vetted FIPS 204 backend is integrated. Clear any
+    // previous material so callers cannot mistake stale output for a new key.
+    keypair.pubkey.data.clear();
+    keypair.seckey.data.clear();
     return false;
 }
 
 bool Sign(const SecretKey& seckey, std::span<const unsigned char> message, std::span<const unsigned char> context, Signature& sig)
 {
-    // This is a scaffold only.
-    // Real ML-DSA-44 signing must include exact hash/digest rules and context separation.
+    // Fail closed until the backend, context rules, and serialization are defined.
+    // Never leave a previous signature in the output on failure.
     (void)seckey;
     (void)message;
     (void)context;
-    (void)sig;
+    sig.data.clear();
     return false;
 }
 
 bool Verify(const PublicKey& pubkey, std::span<const unsigned char> message, std::span<const unsigned char> context, std::span<const unsigned char> sig)
 {
-    // This is a scaffold only.
-    // Real verification must validate canonical serialization, lengths, and signature semantics.
+    // Fail closed until a vetted verifier and canonical encodings are integrated.
     (void)pubkey;
     (void)message;
     (void)context;
