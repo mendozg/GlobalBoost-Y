@@ -5,11 +5,17 @@
 #ifndef GLOBALBOOST_CRYPTO_MLDSA44_H
 #define GLOBALBOOST_CRYPTO_MLDSA44_H
 
+#include <cstddef>
 #include <span>
 #include <vector>
 
 namespace crypto {
 namespace mldsa44 {
+
+// FIPS 204 ML-DSA-44 encoded sizes, in bytes.
+inline constexpr std::size_t PUBLIC_KEY_SIZE = 1312;
+inline constexpr std::size_t SECRET_KEY_SIZE = 2560;
+inline constexpr std::size_t SIGNATURE_SIZE = 2420;
 
 struct PublicKey {
     std::vector<unsigned char> data;
@@ -28,6 +34,8 @@ struct KeyPair {
     SecretKey seckey;
 };
 
+// The current implementation is a fail-closed scaffold. These functions do not
+// provide cryptographic operations until a vetted FIPS 204 backend is integrated.
 bool GenerateKeyPair(KeyPair& keypair);
 bool Sign(const SecretKey& seckey, std::span<const unsigned char> message, std::span<const unsigned char> context, Signature& sig);
 bool Verify(const PublicKey& pubkey, std::span<const unsigned char> message, std::span<const unsigned char> context, std::span<const unsigned char> sig);

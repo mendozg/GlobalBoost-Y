@@ -25,15 +25,18 @@ using VerifySignature = bool (*)(const crypto::mldsa44::PublicKey&,
 static_assert(std::is_same_v<decltype(&crypto::mldsa44::GenerateKeyPair), GenerateKeyPairSignature>);
 static_assert(std::is_same_v<decltype(&crypto::mldsa44::Sign), SignSignature>);
 static_assert(std::is_same_v<decltype(&crypto::mldsa44::Verify), VerifySignature>);
+static_assert(crypto::mldsa44::PUBLIC_KEY_SIZE == 1312);
+static_assert(crypto::mldsa44::SECRET_KEY_SIZE == 2560);
+static_assert(crypto::mldsa44::SIGNATURE_SIZE == 2420);
 } // namespace
 
 BOOST_FIXTURE_TEST_SUITE(mldsa44_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(mldsa44_api_types_are_available)
 {
-    // This test checks the declared API surface only; it deliberately does not
-    // call the scaffold functions, whose implementation is not yet in the
-    // crypto library build.
+    // This test checks the declared API surface and size constants only. It does
+    // not call the scaffold functions, which are not yet linked into the crypto
+    // library build.
     BOOST_CHECK(sizeof(crypto::mldsa44::KeyPair) > 0);
 }
 
