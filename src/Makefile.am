@@ -12,6 +12,12 @@ crypto_libglobalboost_crypto_base_la_SOURCES = \
    crypto/chacha_poly_aead.cpp \
    crypto/chacha20.h \
    crypto/chacha20.cpp \
+   crypto/mldsa_backend.cpp \
+   crypto/mldsa_backend.h \
+   crypto/mldsa_backend_config.cpp \
+   crypto/mldsa_backend_config.h \
+   crypto/mldsa_backend_selector.cpp \
+   crypto/mldsa_backend_selector.h \
    crypto/common.h \
    crypto/hkdf_sha256_32.cpp \
    crypto/hkdf_sha256_32.h \
