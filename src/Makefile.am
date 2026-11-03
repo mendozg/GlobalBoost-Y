@@ -3,7 +3,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 # List of crypto sources
-# The ML-DSA signer scaffold is intentionally fail-closed and not a real backend.
+# ML-DSA backend status:
+# Disabled by default. No real backend, wallet flow, or signing path is enabled.
+# Any backend activation requires explicit security review and a vetted implementation.
 
 crypto_libglobalboost_crypto_base_la_SOURCES = \
    crypto/aes.cpp \
