@@ -5,6 +5,7 @@
 #include <chain.h>
 #include <chainparams.h>
 #include <consensus/params.h>
+#include <deploymentinfo.h>
 #include <test/util/random.h>
 #include <test/util/setup_common.h>
 #include <versionbits.h>
@@ -185,6 +186,12 @@ public:
 
 BOOST_FIXTURE_TEST_SUITE(versionbits_tests, BasicTestingSetup)
 
+BOOST_AUTO_TEST_CASE(mldsa_deployment_registered)
+{
+    BOOST_CHECK(Consensus::ValidDeployment(Consensus::DEPLOYMENT_MLDSA));
+    BOOST_CHECK_EQUAL(DeploymentName(Consensus::DEPLOYMENT_MLDSA), "mldsa");
+}
+
 BOOST_AUTO_TEST_CASE(versionbits_test)
 {
     for (int i = 0; i < 64; i++) {
@@ -201,7 +208,7 @@ BOOST_AUTO_TEST_CASE(versionbits_test)
                            .Mine(2999, TestTime(30004), 0x100).TestFailed().TestStateSinceHeight(2000)
                            .Mine(3000, TestTime(30005), 0x100).TestFailed().TestStateSinceHeight(2000)
                            .Mine(4000, TestTime(30006), 0x100).TestFailed().TestStateSinceHeight(2000)
-
+        
         // DEFINED -> STARTED -> FAILED
                            .Reset().TestDefined().TestStateSinceHeight(0)
                            .Mine(1, TestTime(1), 0).TestDefined().TestStateSinceHeight(0)
@@ -211,7 +218,7 @@ BOOST_AUTO_TEST_CASE(versionbits_test)
                            .Mine(2950, TestTime(10020), 0x100).TestStarted().TestStateSinceHeight(2000) // 899 new blocks
                            .Mine(3000, TestTime(20000), 0).TestFailed().TestStateSinceHeight(3000) // 50 old blocks (so 899 out of the past 1000)
                            .Mine(4000, TestTime(20010), 0x100).TestFailed().TestStateSinceHeight(3000)
-
+        
         // DEFINED -> STARTED -> LOCKEDIN after timeout reached -> ACTIVE
                            .Reset().TestDefined().TestStateSinceHeight(0)
                            .Mine(1, TestTime(1), 0).TestDefined().TestStateSinceHeight(0)
@@ -223,7 +230,7 @@ BOOST_AUTO_TEST_CASE(versionbits_test)
                            .Mine(4000, TestTime(30002), 0).TestActiveDelayed().TestStateSinceHeight(4000, 3000)
                            .Mine(14333, TestTime(30003), 0).TestActiveDelayed().TestStateSinceHeight(4000, 3000)
                            .Mine(24000, TestTime(40000), 0).TestActive().TestStateSinceHeight(4000, 15000)
-
+        
         // DEFINED -> STARTED -> LOCKEDIN before timeout -> ACTIVE
                            .Reset().TestDefined()
                            .Mine(1, TestTime(1), 0).TestDefined().TestStateSinceHeight(0)
@@ -234,11 +241,11 @@ BOOST_AUTO_TEST_CASE(versionbits_test)
                            .Mine(2999, TestTime(19999), 0x200).TestStarted().TestStateSinceHeight(2000) // 49 old blocks
                            .Mine(3000, TestTime(29999), 0x200).TestLockedIn().TestStateSinceHeight(3000) // 1 old block (so 900 out of the past 1000)
                            .Mine(3999, TestTime(30001), 0).TestLockedIn().TestStateSinceHeight(3000)
-                           .Mine(4000, TestTime(30002), 0).TestActiveDelayed().TestStateSinceHeight(4000, 3000) // delayed will not become active until height=15000
+                           .Mine(4000, TestTime(30002), 0).TestActiveDelayed().TestStateSinceHeight(4000, 3000)
                            .Mine(14333, TestTime(30003), 0).TestActiveDelayed().TestStateSinceHeight(4000, 3000)
                            .Mine(15000, TestTime(40000), 0).TestActive().TestStateSinceHeight(4000, 15000)
                            .Mine(24000, TestTime(40000), 0).TestActive().TestStateSinceHeight(4000, 15000)
-
+        
         // DEFINED multiple periods -> STARTED multiple periods -> FAILED
                            .Reset().TestDefined().TestStateSinceHeight(0)
                            .Mine(999, TestTime(999), 0).TestDefined().TestStateSinceHeight(0)
